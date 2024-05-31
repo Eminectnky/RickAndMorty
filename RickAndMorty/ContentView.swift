@@ -5,6 +5,7 @@
 //  Created by Emine CETINKAYA on 30.05.2024.
 //
 
+
 import SwiftUI
 
 struct ContentView: View {
@@ -71,7 +72,7 @@ struct ContentView: View {
             
             .navigationBarItems(trailing:
                        Button(action: {
-                           showingFavorites = true // Favoriler sayfasını göster
+                           showingFavorites = true 
                        }) {
                            Image(systemName: "heart.fill")
                                .foregroundColor(.red)
@@ -79,7 +80,7 @@ struct ContentView: View {
                    )
                    .sheet(isPresented: $showingFavorites) {
                        FavoritesView()
-                           .environmentObject(service) // Favoriler görünümüne service'ı geçir
+                           .environmentObject(service)
                    }
         }
     }

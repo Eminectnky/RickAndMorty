@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FavoritesView: View {
     @EnvironmentObject private var service: RickAndMortyService 
+    
 
     var body: some View {
         NavigationView {
