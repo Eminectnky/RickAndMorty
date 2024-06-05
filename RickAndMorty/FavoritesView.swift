@@ -8,49 +8,79 @@
 import SwiftUI
 
 struct FavoritesView: View {
-    @EnvironmentObject private var service: RickAndMortyService 
-    
+    @EnvironmentObject private var service: RickAndMortyService
+    @State private var isShowingAlert = false
+    @State private var characterToDelete: FavoriteCharacter?
 
     var body: some View {
         NavigationView {
             List(service.favoriteCharacters, id: \.id) { favoriteCharacter in
-                VStack(alignment: .leading, spacing: 8) {
-                    AsyncImage(url: URL(string: favoriteCharacter.image ?? "")) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        case .failure:
-                            Image(systemName: "exclamationmark.icloud.fill")
-                                .foregroundColor(.red)
-                        @unknown default:
-                            ProgressView()
+                HStack{
+                    VStack(alignment: .leading, spacing: 8) {
+                        AsyncImage(url: URL(string: favoriteCharacter.image ?? "")) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            case .failure:
+                                Image(systemName: "exclamationmark.icloud.fill")
+                                    .foregroundColor(.red)
+                            @unknown default:
+                                ProgressView()
+                            }
                         }
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
+                        
+                        Text(favoriteCharacter.name ?? "")
+                            .font(.headline)
+                        
+                        Text("Species: \(favoriteCharacter.species ?? "")")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Text("Status: \(favoriteCharacter.status ?? "")")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
-
-                    Text(favoriteCharacter.name ?? "")
-                        .font(.headline)
-
-                    Text("Species: \(favoriteCharacter.species ?? "")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-
-                    Text("Status: \(favoriteCharacter.status ?? "")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    
+                    Button(action: {
+                        characterToDelete = favoriteCharacter
+                        isShowingAlert = true
+                    }){
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                    .padding(.trailing)
+                    .padding(.top)
+                    
+                    Spacer()
+                    
                 }
-                .padding(.horizontal)
             }
+            .padding(.horizontal)
             .navigationTitle("Favorite Characters")
         }
+         
+            .alert(isPresented: $isShowingAlert) {
+                          Alert(
+                              title: Text("Alert"),
+                              message: Text("\(characterToDelete?.name ?? "") isimli karakteri favorilerden kaldırmak istediğinize emin misiniz?"),
+                              primaryButton: .destructive(Text("Delete")) {
+                                  if let characterToDelete = characterToDelete {
+                                      service.removeFavoriteCharacter(characterToDelete)
+                                  }
+                              },
+                              secondaryButton: .cancel()
+                          )
+                      }
+        }
     }
-}
+
 
 struct FavoritesView_Previews: PreviewProvider {
     static var previews: some View {

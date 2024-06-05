@@ -84,6 +84,24 @@ struct ContentView: View {
                    }
         }
     }
+    
+    private func sendMaxFavoritesNotification() {
+           let content = UNMutableNotificationContent()
+           content.title = "Limit Reached"
+           content.body = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
+           content.sound = UNNotificationSound.default
+
+           let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+           UNUserNotificationCenter.current().add(request) { error in
+               if let error = error {
+                   print("Notification error: \(error.localizedDescription)")
+               } else {
+                   print("Notification scheduled")
+               }
+           }
+       }
 }
 
 #Preview {

@@ -8,11 +8,13 @@
 
 import Foundation
 import CoreData
+import UserNotifications
 
 class RickAndMortyService: ObservableObject {
     
     @Published var characters: [Result] = []
     @Published var favoriteCharacters: [FavoriteCharacter] = []
+    @Published var hasReachedMaxFavorites = false
     
     private let viewContext = PersistenceController.shared.container.viewContext
 
@@ -52,12 +54,18 @@ class RickAndMortyService: ObservableObject {
       func toggleFavorite(character: Result) {
           if let favorite = favoriteCharacters.first(where: { $0.id == character.id }) {
               viewContext.delete(favorite)
+              hasReachedMaxFavorites = false
           } else {
+              if favoriteCharacters.count >= 10 {
+                  hasReachedMaxFavorites = true
+                  return
+              }
               let favorite = FavoriteCharacter(context: viewContext)
               favorite.id = Int64(character.id)
               favorite.name = character.name
               favorite.image = character.image
               favorite.isFavorite = true
+              hasReachedMaxFavorites = false
           }
           saveContext()
           fetchFavorites()
@@ -74,6 +82,30 @@ class RickAndMortyService: ObservableObject {
               print("Failed to save context: \(error.localizedDescription)")
           }
       }
+    
+    func removeFavoriteCharacter(_ character: FavoriteCharacter) {
+            viewContext.delete(character)
+            saveContext()
+            fetchFavorites()
+        }
+    
+    private func sendMaxFavoritesNotification() {
+           let content = UNMutableNotificationContent()
+           content.title = "Limit Reached"
+           content.body = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
+           content.sound = UNNotificationSound.default
+
+           let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+                   if let error = error {
+                       print("Notification error: \(error.localizedDescription)")
+                   } else {
+                       print("Notification scheduled")
+                   }
+               }
+       }
   }
 
 
