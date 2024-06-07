@@ -15,6 +15,8 @@ struct ContentView: View {
     @StateObject private var service = RickAndMortyService()
     
     @State private var showingFavorites = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     
     private var characters: [Result] {
         if searchTxt.isEmpty {
@@ -54,8 +56,13 @@ struct ContentView: View {
                         }
                         Spacer()
                         Button(action: {
-                            service.toggleFavorite(character: character)
-                        }) {
+                            if service.favoriteCharacters.count >= 10 {
+                                                           alertMessage = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
+                                                           showingAlert = true
+                                                       } else {
+                                                           service.toggleFavorite(character: character)
+                                                       }
+                                                   }) {
                             Image(systemName: service.isFavorite(character: character) ? "heart.fill" : "heart")
                                 .foregroundColor(.red)
                         }
@@ -68,6 +75,13 @@ struct ContentView: View {
                         self.service.characters = charactersData.results
                     }
                 }
+                .alert(isPresented: $showingAlert) {
+                                  Alert(
+                                      title: Text("Limit Reached"),
+                                      message: Text(alertMessage),
+                                      dismissButton: .default(Text("OK"))
+                                  )
+                              }
             }
             
             .navigationBarItems(trailing:
@@ -84,24 +98,6 @@ struct ContentView: View {
                    }
         }
     }
-    
-    private func sendMaxFavoritesNotification() {
-           let content = UNMutableNotificationContent()
-           content.title = "Limit Reached"
-           content.body = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
-           content.sound = UNNotificationSound.default
-
-           let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
-           UNUserNotificationCenter.current().add(request) { error in
-               if let error = error {
-                   print("Notification error: \(error.localizedDescription)")
-               } else {
-                   print("Notification scheduled")
-               }
-           }
-       }
 }
 
 #Preview {
