@@ -14,13 +14,13 @@ class RickAndMortyService: ObservableObject {
     
     @Published var characters: [Result] = []
     @Published var favoriteCharacters: [FavoriteCharacter] = []
-  
+    
     
     private let viewContext = PersistenceController.shared.container.viewContext
-
-        init() {
-            fetchFavorites()
-        }
+    
+    init() {
+        fetchFavorites()
+    }
     
     func fetchCharacters(completion: @escaping (Character) -> Void) {
         guard let url = URL(string: "https://rickandmortyapi.com/api/character") else {
@@ -43,64 +43,64 @@ class RickAndMortyService: ObservableObject {
     }
     
     func fetchFavorites() {
-          let request: NSFetchRequest<FavoriteCharacter> = FavoriteCharacter.fetchRequest()
-          do {
-              favoriteCharacters = try viewContext.fetch(request)
-          } catch {
-              print("Failed to fetch favorite characters: \(error.localizedDescription)")
-          }
-      }
-
-      func toggleFavorite(character: Result) {
-          if let favorite = favoriteCharacters.first(where: { $0.id == character.id }) {
-              viewContext.delete(favorite)
-
-          } else {
-              let favorite = FavoriteCharacter(context: viewContext)
-              favorite.id = Int64(character.id)
-              favorite.name = character.name
-              favorite.image = character.image
-              favorite.isFavorite = true
-          }
-          saveContext()
-          fetchFavorites()
-      }
-
-      func isFavorite(character: Result) -> Bool {
-          return favoriteCharacters.contains(where: { $0.id == character.id })
-      }
-
-      private func saveContext() {
-          do {
-              try viewContext.save()
-          } catch {
-              print("Failed to save context: \(error.localizedDescription)")
-          }
-      }
+        let request: NSFetchRequest<FavoriteCharacter> = FavoriteCharacter.fetchRequest()
+        do {
+            favoriteCharacters = try viewContext.fetch(request)
+        } catch {
+            print("Failed to fetch favorite characters: \(error.localizedDescription)")
+        }
+    }
+    
+    func toggleFavorite(character: Result) {
+        if let favorite = favoriteCharacters.first(where: { $0.id == character.id }) {
+            viewContext.delete(favorite)
+            
+        } else {
+            let favorite = FavoriteCharacter(context: viewContext)
+            favorite.id = Int64(character.id)
+            favorite.name = character.name
+            favorite.image = character.image
+            favorite.isFavorite = true
+        }
+        saveContext()
+        fetchFavorites()
+    }
+    
+    func isFavorite(character: Result) -> Bool {
+        return favoriteCharacters.contains(where: { $0.id == character.id })
+    }
+    
+    private func saveContext() {
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to save context: \(error.localizedDescription)")
+        }
+    }
     
     func removeFavoriteCharacter(_ character: FavoriteCharacter) {
-            viewContext.delete(character)
-            saveContext()
-            fetchFavorites()
-        }
+        viewContext.delete(character)
+        saveContext()
+        fetchFavorites()
+    }
     
     private func sendMaxFavoritesNotification() {
-           let content = UNMutableNotificationContent()
-           content.title = "Limit Reached"
-           content.body = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
-           content.sound = UNNotificationSound.default
-
-           let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-           let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
+        let content = UNMutableNotificationContent()
+        content.title = "Limit Reached"
+        content.body = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
+        content.sound = UNNotificationSound.default
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
         UNUserNotificationCenter.current().add(request) { error in
-                   if let error = error {
-                       print("Notification error: \(error.localizedDescription)")
-                   } else {
-                       print("Notification scheduled")
-                   }
-               }
-       }
-  }
+            if let error = error {
+                print("Notification error: \(error.localizedDescription)")
+            } else {
+                print("Notification scheduled")
+            }
+        }
+    }
+}
 
 

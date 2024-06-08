@@ -16,7 +16,7 @@ struct DetailView: View {
                 
             }
             .aspectRatio(contentMode: .fit)
-            .frame(width: 100)
+            .frame(width: 200)
             
             Text(character.name)
             Text(character.species.rawValue)

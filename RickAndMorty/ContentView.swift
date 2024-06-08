@@ -57,12 +57,12 @@ struct ContentView: View {
                         Spacer()
                         Button(action: {
                             if service.favoriteCharacters.count >= 10 {
-                                                           alertMessage = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
-                                                           showingAlert = true
-                                                       } else {
-                                                           service.toggleFavorite(character: character)
-                                                       }
-                                                   }) {
+                                alertMessage = "Favori karakter ekleme sayısını aştınız. Başka bir karakteri favorilerden çıkarmalısınız."
+                                showingAlert = true
+                            } else {
+                                service.toggleFavorite(character: character)
+                            }
+                        }) {
                             Image(systemName: service.isFavorite(character: character) ? "heart.fill" : "heart")
                                 .foregroundColor(.red)
                         }
@@ -76,30 +76,30 @@ struct ContentView: View {
                     }
                 }
                 .alert(isPresented: $showingAlert) {
-                                  Alert(
-                                      title: Text("Limit Reached"),
-                                      message: Text(alertMessage),
-                                      dismissButton: .default(Text("OK"))
-                                  )
-                              }
+                    Alert(
+                        title: Text("Limit Reached"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
             }
             
             .navigationBarItems(trailing:
-                       Button(action: {
-                           showingFavorites = true 
-                       }) {
-                           Image(systemName: "heart.fill")
-                               .foregroundColor(.red)
-                       }
-                   )
-                   .sheet(isPresented: $showingFavorites) {
-                       FavoritesView()
-                           .environmentObject(service)
-                   }
+                                    Button(action: {
+                showingFavorites = true
+            }) {
+                Image(systemName: "heart.fill")
+                    .foregroundColor(.red)
+            }
+            )
+            .sheet(isPresented: $showingFavorites) {
+                FavoritesView()
+                    .environmentObject(service)
+            }
         }
     }
 }
 
 #Preview {
-  ContentView()
+    ContentView()
 }
